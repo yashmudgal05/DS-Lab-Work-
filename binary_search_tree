@@ -1,0 +1,99 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct node
+{
+    struct node * lchild;
+    int data;
+    int height;                                                     //for balancing factor
+    struct node * rchild;
+}*root=NULL;
+
+int nodeHeight(struct node * p)
+{
+    int hl,hr;
+
+    hl=p && p->lchild ? p->lchild->height:0;                      //p is not NULL as well as p->lchild should be there
+    hr=p && p->rchild ? p->rchild->height:0;
+
+    return hl>hr ? hl+1 : hr+1;
+}
+
+int balanceFactor(struct node * p)
+{
+    int hl,hr;
+
+    hl=p && p->lchild ? p->lchild->height:0;
+    hr=p && p->rchild ? p->rchild->height:0;
+
+    return hl-hr;
+}
+
+void inorder(struct node * p)
+{
+    if(p)
+    {
+        inorder(p->lchild);
+        printf("%d\t",p->data);
+        inorder(p->rchild);
+
+    }
+}
+
+struct node * Rinsert(struct node * p, int key)
+{
+    struct node * t = NULL;
+
+    if(p == NULL)
+    {
+        t = (struct node *)malloc(sizeof(struct node));
+        t->data = key;
+        t->height = 1;                                                     //height if there is only one node
+        t->lchild = t->rchild = NULL;
+        return t;
+    }
+    if(key < p->data)
+    {
+        p->lchild = Rinsert(p->lchild, key);
+    }
+    else if(key > p->data)
+    {
+        p->rchild =  Rinsert(p->rchild, key);
+    }
+
+    p->height = nodeHeight(p);
+
+    if(balanceFactor(p) == 2 && balanceFactor(p->lchild)== 1)
+    {
+        printf("LL imbalance on node %d\n",p->data);
+    }
+    else if(balanceFactor(p) == 2 && balanceFactor(p->lchild)== -1)
+    {
+        printf("LR imbalance on node %d\n",p->data);
+    }
+    else if(balanceFactor(p) == -2 && balanceFactor(p->rchild)== -1)
+    {
+        printf("RR imbalance on node %d\n",p->data);
+    }
+    else if(balanceFactor(p) == -2 && balanceFactor(p->rchild)== 1)
+    {
+        printf("RL imbalance on node %d\n",p->data);
+    }
+
+    return p;
+}
+
+int main()
+{
+    struct node * temp;
+
+    root = Rinsert(root,1);
+    Rinsert(root,2);
+    Rinsert(root,3);
+    Rinsert(root,4);
+    Rinsert(root,5);
+
+    inorder(root);
+
+    return 0;
+}
