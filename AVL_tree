@@ -1,0 +1,181 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct node
+{
+    struct node * lchild;
+    int data;
+    int height;                                                     //for balancing factor
+    struct node * rchild;
+}*root=NULL;
+
+int nodeHeight(struct node * p)
+{
+    int hl,hr;
+
+    hl=p && p->lchild ? p->lchild->height:0;                      //p is not NULL as well as p->lchild should be there
+    hr=p && p->rchild ? p->rchild->height:0;
+
+    return hl>hr ? hl+1 : hr+1;
+}
+
+int balanceFactor(struct node * p)
+{
+    int hl,hr;
+
+    hl=p && p->lchild ? p->lchild->height:0;
+    hr=p && p->rchild ? p->rchild->height:0;
+
+    return hl-hr;
+}
+
+struct node * LLrotation(struct node * p)
+{
+     struct node * pl = p->lchild;
+     struct node * plr = pl->rchild;
+
+     pl->rchild = p;
+     p->lchild = plr;
+     p->height = nodeHeight(p);
+     pl->height = nodeHeight(pl);
+
+     if(root == p)
+     {
+         root = pl;
+     }
+     return pl;
+}
+
+struct node * LRrotation(struct node * p)
+{
+    struct node * pl = p->lchild;
+    struct node * plr = pl->rchild;
+
+    pl->rchild = plr->lchild;
+    p->lchild = plr->rchild;
+    plr->lchild = pl;
+    plr->rchild = p;
+
+    pl->height = nodeHeight(pl);
+    p->height = nodeHeight(p);
+    plr->height = nodeHeight(plr);
+
+    if(root == p)
+     {
+         root = plr;
+     }
+
+    return plr ;
+}
+
+struct node * RRrotation(struct node * p)
+{
+     struct node * pr = p->rchild;
+     struct node * prl = pr->lchild;
+
+     pr->lchild = p;
+     p->rchild = prl;
+     p->height = nodeHeight(p);
+     pr->height = nodeHeight(pr);
+
+     if(root == p)
+     {
+         root = pr;
+     }
+     return pr;
+}
+
+struct node * RLrotation(struct node * p)
+{
+    struct node * pr = p->rchild;
+    struct node * prl = pr->lchild;
+
+    pr->lchild = prl->rchild;
+    p->rchild = prl->lchild;
+    prl->rchild = pr;
+    prl->lchild = p;
+
+    pr->height = nodeHeight(pr);
+    p->height = nodeHeight(p);
+    prl->height = nodeHeight(prl);
+
+    if(root == p)
+     {
+         root = prl;
+     }
+
+    return prl;
+}
+
+struct node * Rinsert(struct node * p, int key)
+{
+    struct node * t = NULL;
+
+    if(p == NULL)
+    {
+        t = (struct node *)malloc(sizeof(struct node));
+        t->data = key;
+        t->height = 1;                                                     //height if there is only one node
+        t->lchild = t->rchild = NULL;
+        return t;
+    }
+    if(key < p->data)
+    {
+        p->lchild = Rinsert(p->lchild, key);
+    }
+    else if(key > p->data)
+    {
+        p->rchild =  Rinsert(p->rchild, key);
+    }
+
+    p->height = nodeHeight(p);
+
+    if(balanceFactor(p) == 2 && balanceFactor(p->lchild)== 1)
+    {
+        printf("LL rotation on %d\n",p->data);
+        return LLrotation(p);
+    }
+    else if(balanceFactor(p) == 2 && balanceFactor(p->lchild)== -1)
+    {
+        printf("LR rotation on %d\n",p->data);
+        return LRrotation(p);
+    }
+    else if(balanceFactor(p) == -2 && balanceFactor(p->rchild)== -1)
+    {
+        printf("RR rotation on %d\n",p->data);
+        return RRrotation(p);
+    }
+    else if(balanceFactor(p) == -2 && balanceFactor(p->rchild)== 1)
+    {
+        printf("RL rotation on %d\n",p->data);
+        return RLrotation(p);
+    }
+
+    return p;
+}
+
+void inorder(struct node * p)
+{
+    if(p)
+    {
+        inorder(p->lchild);
+        printf("%d\t",p->data);
+        inorder(p->rchild);
+
+    }
+}
+
+int main()
+{
+    root = Rinsert(root,1);
+    Rinsert(root,2);
+    Rinsert(root,3);
+    Rinsert(root,4);
+    Rinsert(root,5);
+
+    printf("\n");
+    inorder(root);
+
+
+    return 0;
+}
